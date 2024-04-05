@@ -33,7 +33,7 @@ webRoute.post('/products', [ body('categoryId').optional(),
 
 webRoute.get('/products/:slug',getProductBySlug);
 
-webRoute.post('/product/suggestion', [ body('value').notEmpty().withMessage('Value field is Required').isString().withMessage('Value Must be String') ] , userValidation, productSuggestion)
+webRoute.post('/product/suggestion', productSuggestion)
 
  /* PRODUCTS ROUTE END */
 

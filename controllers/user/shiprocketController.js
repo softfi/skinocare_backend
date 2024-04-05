@@ -26,7 +26,7 @@ export const addShiprocketOrder = async (order) => {
     let data = {
       order_id: order?.orderNo, //
       order_date: order?.createdAt.toISOString(), // Dynamic Order Date
-      pickup_location: "SkinOcare", // Later Dynamic
+      pickup_location: "Virat_Nagar_SkinOcare", // Later Dynamic
       channel_id: "4454125",
       comment: "",
       reseller_name: "", // Static

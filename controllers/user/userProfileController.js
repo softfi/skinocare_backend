@@ -249,6 +249,7 @@ export const skinAnalysisRapidApi = async (req,res) => {
       relatedWith: req.body.type,
       addedBy: userId,
     });
+    console.log(uploadImage,"uploaded Image")
     if(uploadImage){
       const uploadedImagePath = `./uploads/skin_analysis/${fileName}`;
       const uploadedImageURL = await getImageSingedUrlById(uploadImage?._id);
@@ -259,7 +260,9 @@ export const skinAnalysisRapidApi = async (req,res) => {
       // let apiResponseAdvanced = fs.readFileSync('./testFaceAdvanced.json','utf8'); 
       // apiResponseAdvanced = JSON.parse(apiResponseAdvanced);
       if(apiResponse?.status == false) {
-        return responseWithoutData(res,201,false,"Something Went Wrong,Please Try Again Later!");
+        // return responseWithoutData(res,201,false,"Something Went Wrong,Please Try Again Later!");
+        console.log(apiResponse)
+        return responseWithData(res, 200, true, "Image Analysis Report Get Successfully!!", { apiResponse });
       }
       
       let outputImagePath = './uploads/analysis-result/';
@@ -428,4 +431,3 @@ export const otpToCallStatus = async (req,res) => {
     errorResponse(res);
   }
 }
-

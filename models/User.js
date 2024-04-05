@@ -1,4 +1,5 @@
 import { model, Schema } from "mongoose";
+import bcrypt from 'bcrypt'
 const userSchema = Schema({
     name: { type: String, index: true },
     email: { type: String, index: true },
@@ -34,6 +35,8 @@ const userSchema = Schema({
     isDeleted: { type: Boolean, default: false },
     hairOptCall: { type: Boolean, default: false },
     skinOptCall: { type: Boolean, default: false },
+    socketId: { type: String, default: null, index: true},
+    online: { type: Boolean, default: false },
 }, { timestamps: true });
 
 

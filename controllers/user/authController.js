@@ -49,7 +49,6 @@ export const userRegister = async (req, res) => {
 
 export const userLogin = async (req, res) => {
     try {
-
         // Find a user with the provided email
         let user = await User.findOne({ email: req.body.email, type: "customer" });
 
@@ -89,7 +88,7 @@ export const resendOtp = async (req, res) => {
     try {
         let otp = Math.floor(100000 + Math.random() * 900000);
         let user = await authValues(req.headers['authorization']);
-        if (req.body.sendOn == 'mobile') {
+        if(req.body.sendOn=='mobile'){
             sendMobileOtp(user.mobile, otp);
             let updateResult = await User.findByIdAndUpdate(user._id, {
                 mobileOtp: otp
@@ -97,7 +96,7 @@ export const resendOtp = async (req, res) => {
             if (updateResult) {
                 responseWithoutData(res, 200, true, "Otp Send Successfully On Mobile");
             }
-        } else if (req.body.sendOn == 'email') {
+        }else if(req.body.sendOn=='email'){
             let updateResult = await User.findByIdAndUpdate(user._id, {
                 emailOtp: otp
             }, { new: true });
@@ -116,7 +115,7 @@ export const verifyOtp = async (req, res) => {
     try {
         let user = await authValues(req.headers['authorization']);
         if (req.body.sendOn == 'email') {
-            if (user.emailOtp === req.body.otp) {
+            if(user.emailOtp === req.body.otp) {
                 let result = await User.findByIdAndUpdate(user._id, {
                     emailOtp: null,
                     isEmailVerify: true
@@ -124,7 +123,7 @@ export const verifyOtp = async (req, res) => {
                 responseWithoutData(res, 200, true, "Email Id Verified Successfully.");
             }
         } else if (req.body.sendOn == 'mobile') {
-            if (user.mobileOtp === req.body.otp) {
+            if(user.mobileOtp === req.body.otp) {
                 let result = await User.findByIdAndUpdate(user._id, {
                     mobileOtp: null,
                     isMobileVerify: true
@@ -143,13 +142,13 @@ export const verifyOtp = async (req, res) => {
 export const applogin = async (req, res) => {
     try {
         let otp = Math.floor(1000 + Math.random() * 9000);
-        let user = await User.findOne({ [req?.body?.type]: req?.body?.value });
-        if (user == null) {
+        let user = await User.findOne({[req?.body?.type]:req?.body?.value});
+        if(user == null){ 
             user = await User.create({
-                [req?.body?.type]: req?.body?.value,
+                [req?.body?.type]:req?.body?.value,
             });
         }
-        if (req.body.type == 'mobile') {
+        if(req.body.type=='mobile'){
             sendMobileOtp(user.mobile, otp);
             let updateResult = await User.findByIdAndUpdate(user._id, {
                 mobileOtp: otp
@@ -157,7 +156,7 @@ export const applogin = async (req, res) => {
             if (updateResult) {
                 responseWithoutData(res, 200, true, "Otp Send Successfully On Mobile");
             }
-        } else if (req.body.type == 'email') {
+        }else if(req.body.type=='email'){
             let updateResult = await User.findByIdAndUpdate(user._id, {
                 emailOtp: otp
             }, { new: true });
@@ -174,33 +173,33 @@ export const applogin = async (req, res) => {
 
 export const appverifyOtp = async (req, res) => {
     try {
-        let user = await User.findOne({ [req?.body?.type]: req?.body?.value });
+        let user = await User.findOne({[req?.body?.type]:req?.body?.value});
         let oldUser = (user?.isRegistered === true) ? 1 : 0;
-        if (req.body.type == 'email') {
-            if ((req?.body?.value == 'skin0care224@gmail.com' && req?.body?.otp == '1234') || (user.emailOtp === Number(req.body.otp))) {
+        if (req.body.type == 'email') {  
+            if((req?.body?.value == 'skin0care224@gmail.com' && req?.body?.otp=='1234') || (user.emailOtp === Number(req.body.otp))) {
                 let result = await User.findByIdAndUpdate(user._id, {
                     emailOtp: null,
                     isEmailVerify: true
                 }, { new: true });
-                if (oldUser == 1) {
-                    await sendPushNotification(user?._id, "Login Alert", `Hello ${user?.name},Your SkinOcare account was recently accessed. If this was you, you can ignore this message. If not, please secure your account immediately.`, "", "/loginAlert");
-                    return responseWithData(res, 200, true, "Login Successfully.", { ...user?._doc, token: getJwtToken(user?._id), isRegistered: true });
-                } else {
-                    return responseWithData(res, 200, true, "Email Id Verified Successfully.", { isRegistered: false });
+                if(oldUser == 1) {
+                    await sendPushNotification(user?._id,"Login Alert",`Hello ${user?.name},Your SkinOcare account was recently accessed. If this was you, you can ignore this message. If not, please secure your account immediately.`,"","/loginAlert");
+                    return responseWithData(res, 200, true, "Login Successfully.",{...user?._doc,token:getJwtToken(user?._id),isRegistered:true});
+                }else{
+                    return responseWithData(res, 200, true, "Email Id Verified Successfully.",{isRegistered:false});
                 }
             }
         } else if (req.body.type == 'mobile') {
-            if ((req?.body?.value == '9035119329' && req?.body?.otp == '1234') || (user.mobileOtp === Number(req.body.otp))) {
+            if((req?.body?.value == '9035119329' && req?.body?.otp=='1234') || (user.mobileOtp === Number(req.body.otp))) {
                 let result = await User.findByIdAndUpdate(user._id, {
                     mobileOtp: null,
                     isMobileVerify: true
-                }, { new: true });
-                if (oldUser == 1) {
-                    await sendPushNotification(user?._id, "Login Alert", `Hello ${user?.name},Your SkinOcare account was recently accessed. If this was you, you can ignore this message. If not, please secure your account immediately.`, "", "/loginAlert");
-                    return responseWithData(res, 200, true, "Login Successfully.", { ...user?._doc, token: getJwtToken(user?._id), isRegistered: true });
-                } else {
-                    return responseWithData(res, 200, true, "Mobile No Verified Successfully.", { isRegistered: false });
-                }
+                }, { new: true });  
+                if(oldUser == 1) {
+                    await sendPushNotification(user?._id,"Login Alert",`Hello ${user?.name},Your SkinOcare account was recently accessed. If this was you, you can ignore this message. If not, please secure your account immediately.`,"","/loginAlert");
+                    return responseWithData(res, 200, true, "Login Successfully.",{...user?._doc,token:getJwtToken(user?._id),isRegistered:true});
+                }else{
+                    return responseWithData(res, 200, true, "Mobile No Verified Successfully.",{isRegistered:false});
+                } 
             }
         }
         responseWithoutData(res, 403, false, "OTP Verification is failed.");
@@ -214,9 +213,9 @@ export const appverifyOtp = async (req, res) => {
 
 export const appuserRegister = async (req, res) => {
     try {
-        let user = await User.findOne({ [req?.body?.type]: req?.body?.value });
+        let user = await User.findOne({[req?.body?.type]:req?.body?.value});
         if (user) {
-            let emailMobile = (req?.body?.type == "email") ? { email: req?.body?.value, mobile: req?.body?.mobile } : { email: req?.body?.email, mobile: req?.body?.value };
+            let emailMobile = (req?.body?.type == "email") ? {email:req?.body?.value,mobile:req?.body?.mobile} : {email:req?.body?.email,mobile:req?.body?.value};
             // let checkUser = null
             // if(req?.body?.type == "mobile"){
             //     checkUser = await User.findOne({email:req?.body?.email});
@@ -224,77 +223,71 @@ export const appuserRegister = async (req, res) => {
             // if(checkUser != null){
             //     return responseWithoutData(res, 400, false, `${(req?.body?.type == "email")? 'Email' : 'Mobile'} already in Used.`);
             // }
-            await User.findByIdAndUpdate(user?._id, {
-                $set: {
-                    customerId: await getNextCustomerId(),
-                    name: req?.body?.name,
-                    age: req?.body?.age,
-                    gender: req?.body?.gender,
-                    referedBy: req?.body?.referedBy,
-                    walletPoint: 0,
-                    currentWalletPoint: 0,
-                    isRegistered: true,
-                    referralCode: await getReferralCode(),
-                    ...emailMobile
-                }
-            })
-            if (req.body.referedBy) {
-                const referAmt = await Setting.findOne({ type: "referral_amount" });
-                const referralUser = await User.findOne({ referralCode: req?.body?.referedBy });
-                await User.findByIdAndUpdate(referralUser?._id, {
-                    $set: {
-                        walletPoint: (Number(referralUser?.walletPoint ? referralUser?.walletPoint : 0) + Number(referAmt?.value[0]?.value)),
-                        currentWalletPoint: (Number(referralUser?.currentWalletPoint ? referralUser?.currentWalletPoint : 0) + Number(referAmt?.value[0]?.value))
-                    }
-                });
-                await User.findByIdAndUpdate(user?._id, {
-                    $set: {
-                        walletPoint: (Number(user?.walletPoint ? user?.walletPoint : 0) + Number(referAmt?.value[0]?.value)),
-                        currentWalletPoint: (Number(user?.currentWalletPoint ? user?.currentWalletPoint : 0) + Number(referAmt?.value[0]?.value))
-                    }
-                });
-                await walletHistory.create({
-                    customerId: referralUser?._id,
-                    type: "credited",
-                    message: "",
-                    walletPoint: Number(referAmt?.value[0]?.value)
-                })
-                await walletHistory.create({
-                    customerId: user?._id,
-                    type: "credited",
-                    message: "",
-                    walletPoint: Number(referAmt?.value[0]?.value)
-                })
-            }
-            user = await User.findOne({ [req?.body?.type]: req?.body?.value });
-            responseWithData(res, 200, true, "Registered Successfully!!.", { ...user?._doc, token: getJwtToken(user?._id) });
+            await User.findByIdAndUpdate(user?._id,{$set:{
+                customerId: await getNextCustomerId(),
+                name:req?.body?.name,  
+                age:req?.body?.age,
+                gender:req?.body?.gender,
+                referedBy:req?.body?.referedBy,
+                walletPoint:0,
+                currentWalletPoint:0,
+                isRegistered:true,
+                referralCode: await getReferralCode(),
+                ...emailMobile
+            }})
+            if(req.body.referedBy){
+                const referAmt = await Setting.findOne({type:"referral_amount"});
+                const referralUser = await User.findOne({referralCode:req?.body?.referedBy});
+                await User.findByIdAndUpdate(referralUser?._id,{$set:{
+                   walletPoint:(Number(referralUser?.walletPoint?referralUser?.walletPoint:0 )+Number(referAmt?.value[0]?.value)),
+                   currentWalletPoint:(Number(referralUser?.currentWalletPoint ? referralUser?.currentWalletPoint:0)+Number(referAmt?.value[0]?.value))
+                 }});
+                await User.findByIdAndUpdate(user?._id,{$set:{
+                walletPoint:(Number(user?.walletPoint?user?.walletPoint:0)+Number(referAmt?.value[0]?.value)),
+                currentWalletPoint:(Number(user?.currentWalletPoint ?  user?.currentWalletPoint:0)+Number(referAmt?.value[0]?.value))
+               }});
+               await walletHistory.create({
+                customerId:referralUser?._id,
+                type:"credited",
+                message:"",
+                walletPoint:Number(referAmt?.value[0]?.value)
+               })
+               await walletHistory.create({
+                customerId:user?._id,
+                type:"credited",
+                message:"",
+                walletPoint:Number(referAmt?.value[0]?.value)
+               })
+           }
+            user = await User.findOne({[req?.body?.type]:req?.body?.value});
+            responseWithData(res, 200, true, "Registered Successfully!!.",{...user?._doc,token:getJwtToken(user?._id)});
         } else {
             responseWithoutData(res, 500, false, "Verify Email or Mobile First.");
         }
     } catch (error) {
         errorLog(error);
         errorResponse(res);
-    }
+    }  
 }
 
 export const appresendOtp = async (req, res) => {
     try {
         let otp = Math.floor(1000 + Math.random() * 9000);
-        let user = await User.findOne({ [req?.body?.type]: req?.body?.value });
-        if (user == null) {
+        let user = await User.findOne({[req?.body?.type]:req?.body?.value});
+        if(user == null){
             user = await User.create({
-                [req?.body?.type]: req?.body?.value,
+                [req?.body?.type]:req?.body?.value,
             });
         }
-        if (req.body.type == 'mobile') {
+        if(req.body.type=='mobile'){
             sendMobileOtp(user.mobile, otp);
             let updateResult = await User.findByIdAndUpdate(user._id, {
                 mobileOtp: otp
             }, { new: true });
-            if (updateResult) {
+            if (updateResult) {  
                 responseWithoutData(res, 200, true, "Otp Resend Successfully On Mobile");
-            }
-        } else if (req.body.type == 'email') {
+            }   
+        }else if(req.body.type=='email'){
             let updateResult = await User.findByIdAndUpdate(user._id, {
                 emailOtp: otp
             }, { new: true });
@@ -310,39 +303,37 @@ export const appresendOtp = async (req, res) => {
 }
 
 
-export const logout = async (req, res) => {
+export const logout = async(req, res)=>{
     try {
-
+        
     } catch (error) {
         errorLog(error);
         errorResponse(res);
     }
 }
 
-export const userAuthDetails = async (req, res) => {
+export const userAuthDetails = async(req, res)=>{
     try {
         let user = await authValues(req.headers['authorization']);
         let userSelectedDetails = await User.findById(user._id).select('name email mobile image age gender currentWalletPoint');
-        responseWithData(res, 200, true, "User Details Fetch Successfully", userSelectedDetails);
+        responseWithData(res, 200, true,"User Details Fetch Successfully", userSelectedDetails);
     } catch (error) {
         errorLog(error);
         errorResponse(error);
     }
 }
 
-export const updateUserDetails = async (req, res) => {
+export const updateUserDetails = async(req, res)=>{
     try {
         let user = await authValues(req.headers['authorization']);
-        let userDetails = await User.findByIdAndUpdate(user?._id, {
-            $set: {
-                image: req?.body?.image ? req?.body?.image : user?.image,
-                name: req?.body?.name ? req?.body?.name : user?.name,
-                age: req?.body?.age ? req?.body?.age : user?.age,
-                email: req?.body?.email ? req?.body?.email : user?.email,
-                mobile: req?.body?.mobile ? req?.body?.mobile : user?.mobile,
-            }
-        }, { new: true });
-        responseWithData(res, 200, true, "User Details Updated Successfully", userDetails);
+        let userDetails = await User.findByIdAndUpdate(user?._id,{$set:{
+            image   :req?.body?.image ? req?.body?.image : user?.image ,  
+            name    :req?.body?.name ? req?.body?.name : user?.name , 
+            age     :req?.body?.age ? req?.body?.age : user?.age ,
+            email   :req?.body?.email ? req?.body?.email : user?.email ,
+            mobile  :req?.body?.mobile ? req?.body?.mobile : user?.mobile ,
+        }},{ new: true });
+        responseWithData(res, 200, true,"User Details Updated Successfully", userDetails);
     } catch (error) {
         errorLog(error);
         errorResponse(error);

@@ -14,8 +14,8 @@ export const dietConsultationPayment = async (req, res) => {
         if (dietPlan) {
             console.log('dietPlan',dietPlan);
             const data = {
-                amount: Number(payableAmount * 100),
-                // amount: 100,
+        amount: Number(payableAmount * 100),
+                      //   amount: 100,
                 mobileNumber: mobile?.toString(),
                 phonepay_merchant_id: PHONEPE_MERCHANT_ID,
                 phonepay_redirect_url: PHONEPE_REDIRECT_URL + "dietpayment/status",

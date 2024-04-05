@@ -27,7 +27,6 @@ export const payment = async (req, res) => {
             amount: Number(order?.grandTotal) * 100,
             currency: 'INR',
             receipt: crypto.randomBytes(10).toString("hex"),
-            payment_capture: 1
         };
 
 

@@ -307,18 +307,22 @@ export const reviews = async(req , res)=>{
     }
 } 
 
-
-export const applyCoupon = async (req,res) => {
+export const applyCoupon = async (req, res) => {
     try {
         let customer = await authValues(req.headers['authorization']);
-        const {couponCode,totalAmount} = req?.body;
-        let discountAmount =  await appliedCouponValue(couponCode,totalAmount, res, customer._id);
-        return responseWithData(res, 200, true, "Discount Applied Successfully!!",{discountAmount:Number(Number(discountAmount).toFixed(2))});
+        const { couponCode, totalAmount } = req?.body;
+        let discountAmount = await appliedCouponValue(couponCode, totalAmount, res, customer._id);
+        
+        return responseWithData(res, 200, true, "Discount Applied Successfully!!", { discountAmount: Number(Number(discountAmount).toFixed(2)) });
     } catch (error) {
+        // Log the error
         errorLog(error);
-        errorResponse(res);
+        
+        // Return the error directly
+        return error;
     }
 }
+
 
 export const getSettingByType = async(req, res)=>{
     try {
@@ -470,7 +474,7 @@ export const getMobileDoctorDetails = async(req, res)=>{
           });
         if(doctorDetail){
             let image = await getImageSingedUrlById(doctorDetail?.image?.toString());
-            doctorDetail = {...doctorDetail._doc,image:image ,  designation: doctorDetail?.isHod == true ? "Head Of Dermotology" : doctorDetail?.designation?.designation };
+            doctorDetail = {...doctorDetail._doc,image:image ,  designation: doctorDetail?.isHod == true ? "Head Of Dermatology" : doctorDetail?.designation?.designation };
             return responseWithData(res, 200, true, "Doctor Details Fetch Successfully", doctorDetail);
         }
         return responseWithoutData(res, 404, false, "Doctor Not Found");
@@ -487,7 +491,7 @@ export const getMobileDoctorDetails = async(req, res)=>{
           });
         let doctorList = [];
         for (let doctor of doctors) {
-            doctorList.push({ ...doctor._doc, image: await getImageSingedUrlById(doctor.image),  designation: doctor?.isHod == true ? "Head Of Dermotology" : doctor?.designation?.designation })
+            doctorList.push({ ...doctor._doc, image: await getImageSingedUrlById(doctor.image),  designation: doctor?.isHod == true ? "Head Of Dermatology" : doctor?.designation?.designation })
         }
         responseWithData(res, 200, true, "Docter List Fetch Successfully", {doctorList});
     } catch (error) {

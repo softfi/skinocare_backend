@@ -12,11 +12,11 @@ export const adminAuthentication = (req, res, next) => {
         jwt.verify(token, JWT_SECRET_TOKEN, async function (err, userId) {
             if (err) {
                 return res.status(401).send({ status: false, msg: "Token Expired" });
-            } else {
+            }else{
                 var decoded = await authValues(token);
                 if (decoded && decoded.type === "admin") {
-                    next();
-                } else {
+                    next();            
+                }else{
                     return res.status(401).send({ status: false, msg: "Invalid Token" });
                 }
             }

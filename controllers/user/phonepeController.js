@@ -8,6 +8,7 @@ import {
 import axios from "axios";
 import { errorLog } from "../../config/logger.js";
 import {
+ emailNotification,
   errorResponse,
   responseWithData,
   responseWithoutData,
@@ -30,9 +31,9 @@ export const createPayment = async (req, res) => {
         order?.shippingAddressId
       );
       const data = {
-        amount: Number(Number(order.grandTotal)?.toFixed(2) * 100),
-        // amount: 100,
-        mobileNumber: shipmentAddress?.phone,
+    amount: Number(Number(order.grandTotal)?.toFixed(2) * 100),
+       //   amount: 100,
+      mobileNumber: shipmentAddress?.phone,
         phonepay_merchant_id: PHONEPE_MERCHANT_ID,
         phonepay_redirect_url: PHONEPE_REDIRECT_URL + "payment/status",
         phonepay_callback_url:
@@ -166,7 +167,7 @@ export const checkStatus = async (req, res) => {
       let shippingAddress = await ShippingAddress.findById(order.shippingAddressId);
 
       /*  Email Notification to Admin Block Start */
-      let body = "Dear Admin, <br> <br> Good news! A new order has been placed. Here are the details:<br><br>Order ID: " + order?.orderNo + "<br>Customer: " + customer?.name + "<br>Delivery Address: " + shippingAddress?.district + "," + shippingAddress?.state + " - " + shippingAddress?.pincode + "<br>Order Total: " + order?.grandTotal + "";
+      let body = "Dear Admin, <br> <br> Good news! A new order has been placed. Here are the details:<br><br>Order ID: " + order?.orderNo + "<br>Customer: " + userDetails?.name + "<br>Delivery Address: " + shippingAddress?.district + "," + shippingAddress?.state + " - " + shippingAddress?.pincode + "<br>Order Total: " + order?.grandTotal + "";
       let subject = "New Order Received";
       let toEmail = "skin0care224@gmail.com";         // Dynamic After Admin Panel Complete
 

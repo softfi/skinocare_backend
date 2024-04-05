@@ -12,7 +12,7 @@ export const doctorList = async (req, res) => {
         });
         let doctorList = [];
         for (let doctor of doctors) {
-            doctorList.push({ ...doctor._doc, image: await getImageSingedUrlById(doctor.image), designation: doctor?.isHod == true ? "Head Of Dermotology" : doctor?.designation?.designation })
+            doctorList.push({ ...doctor._doc, image: await getImageSingedUrlById(doctor.image), designation: doctor?.isHod == true ? "Head Of Dermatology" : doctor?.designation?.designation })
         }
         responseWithData(res, 200, true, "Docter List Fetch Successfully", doctorList);
     } catch (error) {
@@ -91,7 +91,7 @@ export const getDoctorById = async (req, res) => {
             // select: 'designation -_id' 
         });
         if (docter) {
-            docter = { ...docter?._doc, image: await getImageSingedUrlById(docter?._doc?.image), designation: docter?.isHod == true ? "Head Of Dermotology" : docter?.designation?.designation, designationId: docter?.designation?._id }
+            docter = { ...docter?._doc, image: await getImageSingedUrlById(docter?._doc?.image), designation: docter?.isHod == true ? "Head Of Dermatology" : docter?.designation?.designation, designationId: docter?.designation?._id }
             responseWithData(res, 200, true, "Doctor Get Successfully", docter);
         } else {
             responseWithoutData(res, 404, false, "Doctor Not Found");

@@ -4,6 +4,8 @@ import Chat from "../../models/Chat.js";
 import ChatbotMessage from "../../models/ChatbotMessage.js";
 import Message from "../../models/Message.js";
 import Order from "../../models/Order.js";
+import Prescription from "../../models/Prescription.js";
+import kit from "../../models/kit.js";
 
 export const getMessageList = async (customerId, type) => {
   try {
@@ -62,40 +64,56 @@ export const sendChatNotification = async (req, res) => {
   }
 }
 
-export const getchatLists = async (doctorId, customerId) => {
+export const getchatLists = async (customerId) => {
   try {
     let chats = await Chat.find({
       $or: [
-        { senderId: doctorId, isRead: false },
-        { receiverId: customerId, isRead: false }
+        { senderId: customerId },
+        { receiverId: customerId }
       ],
       isDeleted: false
-    }).populate('senderId receiverId').sort({ createdAt: -1 })
-
+      // }).populate('senderId receiverId').sort({ createdAt: -1 })
+    }).populate({
+      path: 'senderId',
+      select: '-deviceId -hairOptCall -skinOptCall -isEmailVerify -isMobileVerify -hairKitId -hairKitGenDate -hairDoctor -hairConcern -skinKitId -skinKitGenDate -skinDoctor -skinConcern -emailOtp -referralCode -gender -age -feedback'
+    })
+      .populate({
+        path: 'receiverId',
+        select: '-deviceId -hairOptCall -skinOptCall -isEmailVerify -isMobileVerify -hairKitId -hairKitGenDate -hairDoctor -hairConcern -skinKitId -skinKitGenDate -skinDoctor -skinConcern -emailOtp -referralCode -gender -age -feedback'
+    }).limit(50).sort({ createdAt: -1 });
     let messageList = [];
 
     for (let chat of chats) {
       let senderImageUrl = null;
       let receiverImageUrl = null;
 
-      if (chat.senderId.image) {
-        senderImageUrl = await getImageSingedUrlById(chat.senderId.image);
+      if (chat?.senderId?.image) {
+        senderImageUrl = await getImageSingedUrlById(chat?.senderId?.image);
       }
 
-      if (chat.receiverId.image) {
-        receiverImageUrl = await getImageSingedUrlById(chat.receiverId.image);
+      if (chat?.receiverId?.image) {
+        receiverImageUrl = await getImageSingedUrlById(chat?.receiverId?.image);
+      }
+      let extraData = '';
+      if(chat?.type == 'prescription'){
+        extraData = await Prescription.findById(chat?.message).select("title description");
+      } else if (chat?.type == 'regimen') {
+          extraData = await kit.findById(chat?.message).select("-isActive -createdAt -updatedAt");
+          extraData = {...extraData?._doc, image : await getImageSingedUrlById(extraData?.image)};
       }
 
       messageList.push({
         ...chat._doc,
         senderImageUrl,
-        receiverImageUrl
+        receiverImageUrl,
+        extraData
       });
     }
+    // console.log("data", messageList)
     // Calculate the count of unread messages
     let unreadMessageCount = await Chat.countDocuments({
       $or: [
-        { senderId: doctorId, isRead: false },
+        { senderId: customerId, isRead: false },
         { receiverId: customerId, isRead: false }
       ],
       isDeleted: false

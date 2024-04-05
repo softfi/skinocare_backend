@@ -67,6 +67,12 @@ export const authValues = async (authToken) => {
     return user;
 }
 
+// export const authValuesForDoc = async (authToken) => {
+//     let result = jwt.verify(authToken, JWT_SECRET_TOKEN);
+//     let user = await DoctorDetail.findById(result.userId);
+//     return user;
+// }
+
 export const isTokenVerified = (authToken) => {
     return new Promise((resolve, reject) => {
         jwt.verify(authToken, JWT_SECRET_TOKEN, async (err, result) => {
@@ -163,7 +169,7 @@ export const sendMobileOtp = async (mobile, otp) => {
 
     axios.request(config)
         .then((response) => {
-            console.log(response);
+            //  console.log(response);
             return true;
         })
         .catch((error) => {
@@ -186,8 +192,7 @@ export const uploadToS3 = (fileName, filePath, fileData) => {
             return resolve(data);
         });
     });
-};
-
+}; 
 export const getImageSingedUrlById = async (uploadId) => {
     let uploadData = await Upload.findOne({ _id: uploadId });
     return await getSignUrl(uploadData?.filePath + '/' + uploadData?.fileName);
@@ -938,4 +943,3 @@ export const getCustomFieldByCustomerId = async (customerId, key) => {
     let customer = await User.findById(customerId);
     return customer?.[key];
 }
-

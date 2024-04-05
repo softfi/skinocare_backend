@@ -251,7 +251,6 @@ doctorAuthRoute.delete("/prescription/:prescriptionId", deletePrescription);
 doctorAuthRoute.get("/dashboard", doctorDashboard);
 
 
-
 doctorRoute.get(
   "/get-Chat-Details",
   [
