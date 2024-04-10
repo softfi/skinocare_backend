@@ -81,7 +81,7 @@ export const doctorLogInUsingMobileNumber = async (req, res) => {
 export const verifyOtpDoctor = async (req, res) => {
     try {
 
-        let user = await User.findOne({ [req?.body?.type]: req?.body?.value });
+        let user = await User.findOne({ [req?.body?.type]: req?.body?.value,isDeleted:false });
         let oldUser = (user?.isRegistered === true) ? 1 : 0;
         if (req.body.type == 'mobile') {
             if ((req?.body?.value == '9035119329' && req?.body?.otp == '1234') || (user.mobileOtp === Number(req.body.otp))) {
@@ -161,7 +161,7 @@ export const updateDoctorDetails = async (req, res) => {
         responseWithData(res, 200, true, "Doctor Details Updated Successfully", DoctorDetails);
     } catch (error) {
         errorLog(error);
-        errorResponse(error);
+        errorResponse(res);
     }
 }
 
@@ -178,7 +178,7 @@ export const doctorAuthDetails = async (req, res) => {
         responseWithData(res, 200, true, "Doctor Details Fetch Successfully", doctorSelectedDetails);
     } catch (error) {
         errorLog(error);
-        errorResponse(error);
+        errorResponse(res);
     }
 }
 
@@ -217,7 +217,7 @@ export const updateDoctorPassword = async (req, res) => {
     } catch (error) {
         // Handle errors
         errorLog(error);
-        errorResponse(error);
+        errorResponse(res);
     }
 }
 

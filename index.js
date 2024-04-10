@@ -9,12 +9,13 @@ import database from "./config/database.js";   // Database Connection load
 import { api } from "./routes/api.js";
 import { userSocket } from "./middlewares/userAuthentication.js";
 import { autoSendMessageByBot, errorResponse, getImageSingedUrlById, saveUserMessage } from "./helpers/helper.js";
-import { getMessageList, getchatLists } from "./controllers/user/chatHistoryController.js";
+import { getMessageList, getchatLists,getchatListsData } from "./controllers/user/chatHistoryController.js";
 import Chat from "./models/Chat.js";
 import Conversation from "./models/Conversation.js";
 import User from "./models/User.js";
 import { errorLog } from "./config/logger.js";
 import Prescription from "./models/Prescription.js";
+import Product from "./models/Product.js";
 import kit from "./models/kit.js";
 // import expressStatusMonitor from "express-status-monitor";
 const app = express();
@@ -66,13 +67,14 @@ app.post('*', (req, res)=>{
     APPLICATION LISTER HTTP & HTTPS SERVERS
 *********************************************/
 // Starting both http & https servers
-//const httpServer = http.createServer(app);
- const httpsServer = https.createServer(credentials, app);
+const httpServer = http.createServer(app);
+//  const httpsServer = https.createServer(credentials, app);
 
 
 /* WEBSOCEKT ROUTE START */
 
-const io = new Server(httpsServer);
+// const io = new Server(httpsServer);
+const io = new Server(httpServer);
 
 io.use(userSocket);  
 
@@ -123,8 +125,13 @@ io.on('connection', async (socket) => {
             if(type == 'prescription'){
                 extraData = await Prescription.findById(message).select("title description");
             } else if (type == 'regimen') {
-                extraData = await kit.findById(message).select("-isActive -createdAt -updatedAt");
+                extraData = await kit.findById(message).select("name image");
                 extraData = {...extraData?._doc, image : await getImageSingedUrlById(extraData?.image)};
+            } else if (type == 'product') {
+                extraData = await Product.findById(message).select("name image slug");
+                extraData = {...extraData?._doc, image : await getImageSingedUrlById(extraData?.image)};
+            } else if (type == 'image') {
+                extraData = { image : await getImageSingedUrlById(message)};
             }
 
             // Push the message ID into the messages array of the conversation
@@ -136,28 +143,43 @@ io.on('connection', async (socket) => {
             // io.emit('receiveMessage', data);
             // Emit the message to the receiver's socket ID
             io.to(recieverData?.socketId).emit('receiveMessage', {...data,extraData:extraData});
-
-            socket.to(recieverData?.socketId).emit('chatLists', await getchatLists(recieverData?._id))
             socket.emit('chatLists', await getchatLists(socket?.customerId))
-
+            socket.emit('chatListsData', await getchatListsData(socket?.customerId))
+            socket.to(recieverData?.socketId).emit('chatLists', await getchatLists(recieverData?._id))
+            socket.to(recieverData?.socketId).emit('chatListsData', await getchatListsData(recieverData?._id))  
         } catch (error) {
             errorLog(error);
-            errorResponse(error);
         }
     });
+    socket.emit('chatLists', await getchatLists(socket?.customerId))
+    socket.emit('chatListsData', await getchatListsData(socket?.customerId))
 
 
     // Handle the 'readMessage' event
     socket.on('readMessage', async ({ id }) => {
         try {
-            const chatData = await Chat.findById({ _id: id, isDeleted: false });
-            chatData.isRead = true
-            await chatData.save();
+            let conversation = await Conversation.findOne({_id: id});
+            if(conversation) {
+                await Chat.updateMany({
+                    _id: {$in:conversation?.messages},
+                    receiverId: socket?.customerId,
+                    isRead: false,
+                    isDeleted: false
+                },{$set:{isRead: true}});
+            }
+            // let unreadMessageCount = await Chat.countDocuments({
+            //     _id: {$in:conversation?.messages},
+            //     receiverId: socket?.customerId,
+            //     isRead: false,
+            //     isDeleted: false
+            // });
+            // const chatData = await Chat.findById({ _id: id, isDeleted: false });
+            // chatData.isRead = true
+            // await chatData.save();
             // Emit an acknowledgment to the sender
             socket.emit('messageRead', { messageId: id });
         } catch (error) {
             errorLog(error);
-            errorResponse(error);
         }
     });
 
@@ -169,7 +191,6 @@ io.on('connection', async (socket) => {
             io.emit('chatComplete', id);
         } catch (error) {
             errorLog(error);
-            errorResponse(error);
         }
     });
 
@@ -177,10 +198,10 @@ io.on('connection', async (socket) => {
     socket.on('typing', async ( isTyping ) => {
         try{
             let recieverData = await User.findOne({_id:isTyping?.receiverId});
+            console.log('socket : ',recieverData?.socketId);
             io.to(recieverData?.socketId).emit('userTyping', isTyping?.isTyping);
         } catch (error) {
             errorLog(error);
-            errorResponse(error);
         }
     });
     // Handle online event
@@ -195,7 +216,6 @@ io.on('connection', async (socket) => {
             }
         } catch (error) {
             errorLog(error);
-            errorResponse(error);
         }
         
     });
@@ -211,7 +231,6 @@ io.on('connection', async (socket) => {
             }
         } catch (error) {
             errorLog(error);
-            errorResponse(error);
         }
         // console.log('User disconnected');
     });
@@ -219,10 +238,10 @@ io.on('connection', async (socket) => {
 
 /* WEBSOCEKT ROUTE END */
 
-//httpServer.listen(PORT,()=>{
-  //  console.log(`Server is running on port ${PORT}`);
-//});
+httpServer.listen(PORT,()=>{
+   console.log(`Server is running on port ${PORT}`);
+});
 
- httpsServer.listen(PORT,()=>{
-     console.log(`Server is running on port ${PORT}`);
- });
+//  httpsServer.listen(PORT,()=>{
+//      console.log(`Server is running on port ${PORT}`);
+//  });

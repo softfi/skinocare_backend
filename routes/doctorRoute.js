@@ -7,7 +7,7 @@ import { authValues } from "../helpers/helper.js";
 import { uploadImageValdator } from "../validation/adminValidation.js";
 import { uploadImageDoctorSide } from "../controllers/admin/uploadController.js";
 import { multerImageUpload } from "../config/config.js";
-import { addPrescription, completeChat, deletePrescription, doctorDashboard, getAllKitsDoctor, getChatDetails, getKitByKitId, getListAllUsers, getPrescriptionById, getPrescriptionList, updatePrescription } from "../controllers/doctor/doctorController.js";
+import { addPrescription, completeChat, deletePrescription, doctorDashboard, getAllKitsDoctor, getChatDetails, getKitByKitId, getKitDetails, getListAllUsers, getPrescriptionById, getPrescriptionList, updatePrescription } from "../controllers/doctor/doctorController.js";
 import kit from "../models/kit.js";
 export const doctorRoute = express.Router();
 export const doctorAuthRoute = express.Router();
@@ -251,7 +251,7 @@ doctorAuthRoute.delete("/prescription/:prescriptionId", deletePrescription);
 doctorAuthRoute.get("/dashboard", doctorDashboard);
 
 
-doctorRoute.get(
+doctorRoute.post(
   "/get-Chat-Details",
   [
     body("id", "Id field is Required").notEmpty(),
@@ -268,4 +268,13 @@ doctorRoute.put(
   ],
   doctorValidation,
   completeChat
+);
+
+doctorRoute.post(
+  "/get-kit-details",
+  [
+    body("id", "Id field is Required").notEmpty(),
+  ],
+  doctorValidation,
+  getKitDetails
 );
