@@ -4,6 +4,7 @@ import { authValues, errorResponse, getImageSingedUrlById, responseWithData, res
 import { errorLog } from "../../config/logger.js"
 import Kit from "../../models/kit.js";
 import Prescription from "../../models/Prescription.js";
+import kit from "../../models/kit.js";
 import Plan from "../../models/Plan.js";
 import Product from "../../models/Product.js";
 import Conversation from "../../models/Conversation.js";
@@ -34,7 +35,7 @@ export const getListAllUsers = async (req, res) => {
 
     } catch (error) {
         errorLog(error);
-        errorResponse(error);
+        errorResponse(res);
     }
 
 }
@@ -70,7 +71,7 @@ export const getAllKitsDoctor = async (req, res) => {
         responseWithData(res, 200, true, "Doctor All Kits Fetch Successfully", getAllKits);
     } catch (error) {
         errorLog(error);
-        errorResponse(error);
+        errorResponse(res);
     }
 }
 
@@ -158,7 +159,7 @@ export const addPrescription = async (req, res) => {
         responseWithoutData(res, 200, false, "Prescription Creation failed");
     } catch (error) {
         errorLog(error);
-        errorResponse(error);
+        errorResponse(res);
     }
 
 }
@@ -256,18 +257,39 @@ export const deletePrescription = async (req, res) => {
 // GET CHAT DETAILS
 export const getChatDetails = async (req, res) => {
     try {
-
-        const conversation = await Conversation.findOne({ participants: req.body.id }).populate('messages');
+        let doctor = await authValues(req.headers['authorization']);
+        const conversation = await Conversation.findOne({ $or:[
+            {participants: [req?.body?.id,doctor?._id]},
+            {participants: [doctor?._id,req?.body?.id]}
+        ] }).populate('messages');
 
         if (conversation) {
-            return responseWithData(res, 200, true, "Conversation Details Fetched successfully", conversation);
+            let messages = [];
+            if(conversation?.messages){
+                for (let message of conversation?.messages) {
+                    let extraData = '';
+                    if(message?.type == 'prescription'){
+                        extraData = await Prescription.findById(message?.message).select("title description");
+                    } else if (message?.type == 'regimen') {
+                        extraData = await kit.findById(message?.message).select("name image");
+                        extraData = {...extraData?._doc, image : await getImageSingedUrlById(extraData?.image)};
+                    } else if (message?.type == 'product') {
+                        extraData = await Product.findById(message?.message).select("name image slug");
+                        extraData = {...extraData?._doc, image : await getImageSingedUrlById(extraData?.image)};
+                    } else if (message?.type == 'image') {
+                        extraData = { image : await getImageSingedUrlById(message?.message)};
+                    }
+                    messages.push({...message?._doc,extraData});
+                }
+            }
+            return responseWithData(res, 200, true, "Conversation Details Fetched successfully", {...conversation?._doc, messages: messages});
         } else {
             return responseWithoutData(res, 200, false, "Conversation details not found for the specified participants");
         }
 
     } catch (error) {
         errorLog(error);
-        errorResponse(error);
+        errorResponse(res);
     }
 
 }
@@ -286,7 +308,28 @@ export const completeChat = async (req, res) => {
 
     } catch (error) {
         errorLog(error);
-        errorResponse(error);
+        errorResponse(res);
 
     }
 };
+
+export const getKitDetails = async (req,res) => {
+    try {
+        const kitData = await kit.findOne({_id:req?.body?.id})
+        // .populate("symtom products");
+        .populate({ path: 'symtom', select: 'name type' })
+        .populate({ path: 'products', select: 'name thumbnail slug price mrp description' })
+        if (kitData) {
+            let products = [];
+            for (let product of kitData?.products) {
+                products.push({...product?._doc, thumbnail: (product?.thumbnail) ? await getImageSingedUrlById(product?.thumbnail) : ""});
+            } 
+            delete kitData?._doc?.instruction;
+            return responseWithData(res, 200, true, "Kit Details Find Successfully!!", {...kitData?._doc,image: (kitData?.image) ? await getImageSingedUrlById(kitData?.image) : "",products});
+        }
+        return responseWithoutData(res, 201, false, 'No Record Found!!');
+    } catch (error) {
+        errorLog(error);
+        errorResponse(res);
+    }
+}

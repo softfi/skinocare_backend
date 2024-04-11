@@ -5,7 +5,7 @@ const chatSchema = Schema({
     senderId: { type: Schema.Types.ObjectId, index: true, ref: "user" },
     receiverId: { type: Schema.Types.ObjectId, index: true, ref: "user" },
     isRead: { type: Boolean, default: false },
-    type: { type: String, index: true, enum: ["prescription", "regimen"] },
+    type: { type: String, index: true},
     isImage: { type: Boolean, index: true, default: false },
     isDeleted: { type: Boolean, index: true, default: false },
 }, { timestamps: true });

@@ -319,7 +319,7 @@ export const userAuthDetails = async(req, res)=>{
         responseWithData(res, 200, true,"User Details Fetch Successfully", userSelectedDetails);
     } catch (error) {
         errorLog(error);
-        errorResponse(error);
+        errorResponse(res);
     }
 }
 
@@ -336,7 +336,7 @@ export const updateUserDetails = async(req, res)=>{
         responseWithData(res, 200, true,"User Details Updated Successfully", userDetails);
     } catch (error) {
         errorLog(error);
-        errorResponse(error);
+        errorResponse(res);
     }
 }
 

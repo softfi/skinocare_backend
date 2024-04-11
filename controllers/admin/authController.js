@@ -60,7 +60,7 @@ export const updateAdminProfile = async(req, res)=>{
             adminDetails.name = req?.body?.name ? req?.body?.name : adminDetails.name;  
             adminDetails.email = req?.body?.email ? req?.body?.email : adminDetails.email;  
             adminDetails.mobile = req?.body?.mobile ? req?.body?.mobile : adminDetails.mobile;  
-            adminDetails.password = req?.body?.newpassword ? await bcrypt.hash(req?.body?.newpassword, 10) : adminDetails.password;  
+            adminDetails.password = req?.body?.newPassword ? await bcrypt.hash(req?.body?.newPassword, 10) : adminDetails.password;  
             if(await adminDetails.save()){
                 return responseWithoutData(res, 200, true, "Admin Profile Updated Successfully");
             }
