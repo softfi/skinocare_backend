@@ -67,14 +67,14 @@ app.post('*', (req, res)=>{
     APPLICATION LISTER HTTP & HTTPS SERVERS
 *********************************************/
 // Starting both http & https servers
-const httpServer = http.createServer(app);
-//  const httpsServer = https.createServer(credentials, app);
+// const httpServer = http.createServer(app);
+ const httpsServer = https.createServer(credentials, app);
 
 
 /* WEBSOCEKT ROUTE START */
 
 // const io = new Server(httpsServer);
-const io = new Server(httpServer);
+const io = new Server(httpsServer);
 
 io.use(userSocket);  
 
@@ -238,10 +238,10 @@ io.on('connection', async (socket) => {
 
 /* WEBSOCEKT ROUTE END */
 
-httpServer.listen(PORT,()=>{
-   console.log(`Server is running on port ${PORT}`);
-});
+// httpServer.listen(PORT,()=>{
+//    console.log(`Server is running on port ${PORT}`);
+// });
 
-//  httpsServer.listen(PORT,()=>{
-//      console.log(`Server is running on port ${PORT}`);
-//  });
+ httpsServer.listen(PORT,()=>{
+     console.log(`Server is running on port ${PORT}`);
+ });
