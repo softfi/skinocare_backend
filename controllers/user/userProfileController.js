@@ -431,3 +431,19 @@ export const otpToCallStatus = async (req,res) => {
     errorResponse(res);
   }
 }
+
+export const faceAnalysisStatus = async (req,res) => {
+  try {
+    let customer = await authValues(req.headers['authorization']);
+    if (customer) {
+      let faceAnalStatus = await SkinAnalysis.find({customerId:customer?._id}).count();
+      
+      return responseWithData(res,200,true,"Face Analysis Status get Successfully!!",{faceAnalStatus:(faceAnalStatus> 0)? true:false})
+    }else {
+      return responseWithoutData(res,403,false,"Invalid User Access!!");
+    }
+  } catch (error) {
+    errorLog(error);
+    errorResponse(res);
+  }
+}

@@ -83,6 +83,7 @@ import { multerImageUpload } from "../config/config.js";
 import {
   analysisReport,
   analysisReportDelete,
+  faceAnalysisStatus,
   generateKit,
   imageProcessNew,
   imageProcessWithLiveData,
@@ -1209,4 +1210,9 @@ userAuthRoute.post(
   ],
   userValidation,
   otpToCallStatus
+);
+
+userAuthRoute.post(
+  "/face-analysis-status",
+  faceAnalysisStatus
 );
